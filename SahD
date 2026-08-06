@@ -1,0 +1,553 @@
+-- SD SYSTEM LUA
+-- PARTE 1/4
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "SD_SYSTEM"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+
+
+-- INTRO
+
+local intro = Instance.new("Frame")
+intro.Parent = gui
+intro.Size = UDim2.new(1,0,1,0)
+intro.BackgroundColor3 = Color3.fromRGB(0,0,0)
+
+
+local title = Instance.new("TextLabel")
+title.Parent = intro
+title.Size = UDim2.new(1,0,0,100)
+title.Position = UDim2.new(0,0,.35,0)
+title.BackgroundTransparency = 1
+title.Text = "SD SYSTEM"
+title.TextScaled = true
+title.TextColor3 = Color3.new(1,1,1)
+
+
+local load = Instance.new("TextLabel")
+load.Parent = intro
+load.Size = UDim2.new(1,0,0,50)
+load.Position = UDim2.new(0,0,.5,0)
+load.BackgroundTransparency = 1
+load.Text = "Cargando..."
+load.TextScaled = true
+load.TextColor3 = Color3.new(1,1,1)
+
+
+
+task.wait(3)
+
+
+TweenService:Create(
+	intro,
+	TweenInfo.new(1),
+	{BackgroundTransparency = 1}
+):Play()
+
+
+task.wait(1)
+intro:Destroy()
+
+
+
+-- FUNCION MOVER
+
+local function mover(obj)
+
+	local activo = false
+	local inicio
+	local pos
+
+
+	obj.InputBegan:Connect(function(input)
+
+		if input.UserInputType == Enum.UserInputType.Touch 
+		or input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+			activo = true
+			inicio = input.Position
+			pos = obj.Position
+
+		end
+
+	end)
+
+
+	UIS.InputChanged:Connect(function(input)
+
+		if activo then
+
+			local cambio = input.Position - inicio
+
+			obj.Position = UDim2.new(
+				pos.X.Scale,
+				pos.X.Offset + cambio.X,
+				pos.Y.Scale,
+				pos.Y.Offset + cambio.Y
+			)
+
+		end
+
+	end)
+
+
+	UIS.InputEnded:Connect(function()
+
+		activo = false
+
+	end)
+
+end
+
+
+
+-- ICONO SD
+
+local icono = Instance.new("TextButton")
+icono.Parent = gui
+icono.Size = UDim2.new(0,70,0,70)
+icono.Position = UDim2.new(.05,0,.5,0)
+icono.Text = "SD"
+icono.TextScaled = true
+
+mover(icono)
+
+
+
+-- MENU
+
+local menu = Instance.new("Frame")
+menu.Parent = gui
+menu.Size = UDim2.new(0,250,0,420)
+menu.Position = UDim2.new(.5,-125,.2,0)
+menu.Visible = false
+
+
+local barra = Instance.new("TextLabel")
+barra.Parent = menu
+barra.Size = UDim2.new(1,0,0,45)
+barra.Text = "SD MENU"
+barra.TextScaled = true
+barra.BackgroundColor3 = Color3.fromRGB(40,40,40)
+
+
+-- MOVER MENU INTERNO
+
+mover(menu)
+
+
+
+icono.MouseButton1Click:Connect(function()
+
+	menu.Visible = not menu.Visible
+
+end)
+
+
+
+local y = 50
+
+
+function crearBoton(nombre,func)
+
+	local b = Instance.new("TextButton")
+	b.Parent = menu
+	b.Size = UDim2.new(1,-10,0,35)
+	b.Position = UDim2.new(0,5,0,y)
+	b.Text = nombre
+	b.TextScaled = true
+
+	y += 40
+
+	b.MouseButton1Click:Connect(func)
+
+end
+-- SD SYSTEM LUA
+-- PARTE 2/4
+
+
+local function getHumanoid()
+
+	local char = player.Character
+
+	if char then
+		return char:FindFirstChildOfClass("Humanoid")
+	end
+
+end
+
+
+
+-- VELOCIDAD
+
+crearBoton("⚡ Velocidad +",function()
+
+	local hum = getHumanoid()
+
+	if hum then
+		hum.WalkSpeed += 5
+	end
+
+end)
+
+
+
+crearBoton("🚶 Velocidad normal",function()
+
+	local hum = getHumanoid()
+
+	if hum then
+		hum.WalkSpeed = 16
+	end
+
+end)
+
+
+
+-- SALTO INFINITO
+
+local salto = false
+
+
+crearBoton("🦘 Salto infinito",function()
+
+	salto = not salto
+
+end)
+
+
+
+UIS.JumpRequest:Connect(function()
+
+	if salto then
+
+		local hum = getHumanoid()
+
+		if hum then
+
+			hum:ChangeState(Enum.HumanoidStateType.Jumping)
+
+		end
+
+	end
+
+end)
+
+
+
+-- VIDA ❤️
+
+crearBoton("❤️ Recuperar vida",function()
+
+	local hum = getHumanoid()
+
+	if hum then
+
+		hum.Health = hum.MaxHealth
+
+	end
+
+end)
+
+
+
+-- GRAVEDAD
+
+crearBoton("🌙 Gravedad baja",function()
+
+	workspace.Gravity = 80
+
+end)
+
+
+
+crearBoton("🌎 Gravedad normal",function()
+
+	workspace.Gravity = 196.2
+
+end)
+-- SD SYSTEM LUA
+-- PARTE 3/4
+
+
+local RunService = game:GetService("RunService")
+
+
+
+-- VUELO ✈️
+
+local volar = false
+local subir = false
+local bajar = false
+
+local velocidadVuelo = 50
+
+local fuerzaVuelo
+
+
+
+local vuelo = Instance.new("Frame")
+vuelo.Parent = gui
+vuelo.Size = UDim2.new(0,120,0,160)
+vuelo.Position = UDim2.new(.75,0,.55,0)
+vuelo.Visible = false
+
+
+local up = Instance.new("TextButton")
+up.Parent = vuelo
+up.Size = UDim2.new(1,0,0,50)
+up.Text = "⬆️"
+up.TextScaled = true
+
+
+local down = Instance.new("TextButton")
+down.Parent = vuelo
+down.Size = UDim2.new(1,0,0,50)
+down.Position = UDim2.new(0,0,0,55)
+down.Text = "⬇️"
+down.TextScaled = true
+
+
+local mas = Instance.new("TextButton")
+mas.Parent = vuelo
+mas.Size = UDim2.new(.5,0,0,45)
+mas.Position = UDim2.new(0,0,0,110)
+mas.Text = "+"
+mas.TextScaled = true
+
+
+local menos = Instance.new("TextButton")
+menos.Parent = vuelo
+menos.Size = UDim2.new(.5,0,0,45)
+menos.Position = UDim2.new(.5,0,0,110)
+menos.Text = "-"
+menos.TextScaled = true
+
+
+
+mover(vuelo)
+
+
+
+up.MouseButton1Down:Connect(function()
+	subir = true
+end)
+
+up.MouseButton1Up:Connect(function()
+	subir = false
+end)
+
+
+
+down.MouseButton1Down:Connect(function()
+	bajar = true
+end)
+
+down.MouseButton1Up:Connect(function()
+	bajar = false
+end)
+
+
+
+mas.MouseButton1Click:Connect(function()
+
+	velocidadVuelo += 25
+
+end)
+
+
+
+menos.MouseButton1Click:Connect(function()
+
+	velocidadVuelo -= 25
+
+	if velocidadVuelo < 25 then
+		velocidadVuelo = 25
+	end
+
+end)
+
+
+
+crearBoton("✈️ Volar ON/OFF",function()
+
+
+	volar = not volar
+
+
+	local char = player.Character
+
+	if not char then return end
+
+
+	local root = char:FindFirstChild("HumanoidRootPart")
+
+	if not root then return end
+
+
+
+	if volar then
+
+
+		vuelo.Visible = true
+
+
+		fuerzaVuelo = Instance.new("BodyVelocity")
+		fuerzaVuelo.MaxForce = Vector3.new(0,math.huge,0)
+		fuerzaVuelo.Parent = root
+
+
+	else
+
+
+		vuelo.Visible = false
+
+
+		if fuerzaVuelo then
+
+			fuerzaVuelo:Destroy()
+			fuerzaVuelo = nil
+
+		end
+
+
+	end
+
+
+end)
+
+
+
+RunService.RenderStepped:Connect(function()
+
+	if volar and fuerzaVuelo then
+
+
+		if subir then
+
+			fuerzaVuelo.Velocity = Vector3.new(0,velocidadVuelo,0)
+
+
+		elseif bajar then
+
+			fuerzaVuelo.Velocity = Vector3.new(0,-velocidadVuelo,0)
+
+
+		else
+
+			fuerzaVuelo.Velocity = Vector3.zero
+
+		end
+
+
+	end
+
+end)
+-- SD SYSTEM LUA
+-- PARTE 4/4
+
+
+local posicionGuardada
+
+
+
+-- GUARDAR POSICIÓN 📍
+
+crearBoton("📍 Guardar posición",function()
+
+	local char = player.Character
+
+	if char and char:FindFirstChild("HumanoidRootPart") then
+
+		posicionGuardada = char.HumanoidRootPart.CFrame
+
+	end
+
+end)
+
+
+
+-- VOLVER POSICIÓN ↩️
+
+crearBoton("↩️ Volver posición",function()
+
+	local char = player.Character
+
+	if char and posicionGuardada then
+
+		char.HumanoidRootPart.CFrame = posicionGuardada
+
+	end
+
+end)
+
+
+
+-- INVISIBLE 👻
+
+local transparencias = {}
+
+
+crearBoton("👻 Invisible",function()
+
+	local char = player.Character
+
+	if not char then return end
+
+
+	transparencias = {}
+
+
+	for _,obj in pairs(char:GetDescendants()) do
+
+
+		if obj:IsA("BasePart") then
+
+			transparencias[obj] = obj.Transparency
+
+			obj.Transparency = 1
+
+
+		elseif obj:IsA("Decal") then
+
+			transparencias[obj] = obj.Transparency
+
+			obj.Transparency = 1
+
+		end
+
+
+	end
+
+end)
+
+
+
+-- VISIBLE 👤
+
+crearBoton("👤 Visible",function()
+
+	for obj,valor in pairs(transparencias) do
+
+		if obj and obj.Parent then
+
+			obj.Transparency = valor
+
+		end
+
+	end
+
+end)
+
+
+
+print("🔥 SD SYSTEM CARGADO COMPLETAMENTE 🔥")
